@@ -115,13 +115,15 @@ func (c *Config) marshallInto(into *os.File, xtream bool) error {
 	re_channel := regexp.MustCompile(c.ChannelRegex)
 
 TRACKS_LOOP:
-	for _, track := range c.playlist.Tracks {
+	for i, track := range c.playlist.Tracks {
+		
+		buffer.Reset()
 
 		// Group regex
 		if c.GroupRegex != "" {
-			for i := range track.Tags {
-				name := track.Tags[i].Name
-				value := track.Tags[i].Value
+			for j := range track.Tags {
+				name := track.Tags[j].Name
+				value := track.Tags[j].Value
 				if name == "group-title" && !re_group.MatchString(value) {
 					continue TRACKS_LOOP
 				}
@@ -138,12 +140,12 @@ TRACKS_LOOP:
 		into.WriteString("#EXTINF:")                       // nolint: errcheck
 		into.WriteString(fmt.Sprintf("%d ", track.Length)) // nolint: errcheck
 
-		for i := range track.Tags {
-			if i == len(track.Tags)-1 {
-				buffer.WriteString(fmt.Sprintf("%s=%q", track.Tags[i].Name, track.Tags[i].Value)) // nolint: errcheck
+		for j := range track.Tags {
+			if j == len(track.Tags)-1 {
+				buffer.WriteString(fmt.Sprintf("%s=%q", track.Tags[j].Name, track.Tags[j].Value)) // nolint: errcheck
 				continue
 			}
-			buffer.WriteString(fmt.Sprintf("%s=%q ", track.Tags[i].Name, track.Tags[i].Value)) // nolint: errcheck
+			buffer.WriteString(fmt.Sprintf("%s=%q ", track.Tags[j].Name, track.Tags[j].Value)) // nolint: errcheck
 		}
 
 		uri, err := c.replaceURL(track.URI, i-ret, xtream)
